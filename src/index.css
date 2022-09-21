@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+:root {
+  --blur-width: 5px;
+  --app-padding: 4 * var(--blur-width);
+  --app-width: calc(min(100vh, 100vw) - 2 * var(--app-padding));
+}
+
+body {
+  overflow: hidden;
+}
+
+#cam-video {
+  visibility: hidden;
+  position: absolute;
+}
+
+.app {
+  position: absolute;
+  width: var(--app-width);
+  height: var(--app-width);
+  z-index: 1;
+  left: calc(var(--app-padding));
+  top: calc(var(--app-padding));
+}
+
+[data-tauri-drag-region]:hover {
+  cursor: move;
+}
+
+.app-circle {
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 var(--blur-width);
+}
+
+.app-circle-no-hidden {
+  border-radius: 50%;
+  box-shadow: 0 0 var(--blur-width);
+}
+
+.cam-video {
+  transform: translateX(-50%);
+  height: 100%;
+  margin-left: 50%;
+}
+
+.cam-video-revert {
+  transform: translateX(-50%) scaleX(-1);
+}
+
+.btn {
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 0 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+.btn-selected {
+  background-color: #333;
+}
+
+.btn-selected img {
+  filter: invert(1) !important;
+}
+
+.btn img {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.btn-close {
+  right: calc(var(--app-width) / 8);
+  top: calc(var(--app-width) / 8);
+  transform: translate(50%, -50%);
+}
+
+.btn-beauty {
+  right: calc(var(--app-width) / 8);
+  bottom: calc(var(--app-width) / 8);
+  transform: translate(50%, 50%);
+}
+
+.btn-face {
+  left: calc(var(--app-width) / 8);
+  bottom: calc(var(--app-width) / 8);
+  transform: translate(-50%, 50%);
+}
+
+.btn-mirror {
+  left: calc(var(--app-width) / 8);
+  top: calc(var(--app-width) / 8);
+  transform: translate(-50%, -50%);
+}
+
+.hide-circle-btn {
+  display: none !important;
+}
+
+.btn-change-size {
+  width: 80px;
+  height: 38px;
+  backdrop-filter: blur(20px);
+  left: 0px;
+  right: 0px;
+  position: absolute;
+  bottom: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 30px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.btn-change-size-btn {
+  border: 1px solid #fff;
+  border-radius: 50%;
+  user-select: none;
+  -webkit-user-select: none;
+  margin-left: 5px;
+  cursor: pointer;
+}
+.btn-change-size-small {
+  width: 9px;
+  height: 9px;
+}
+.btn-change-size-middle {
+  width: 14px;
+  height: 14px;
+}
+.btn-change-size-large {
+  width: 20px;
+  height: 20px;
+}
+.btn-change-size-select {
+  background-color: #fff;
+}

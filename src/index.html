@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>音视频捕获</title>
+    <link href="./index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="app app-circle">
+      <video
+        id="cam-video"
+        controlslist="nodownload nofullscreen noremoteplayback"
+      ></video>
+      <canvas class="cam-video cam-video-revert" id="outputCanvas"></canvas>
+    </div>
+    <div
+      class="app app-circle-no-hidden"
+      id="detect-show-area"
+      data-tauri-drag-region
+    >
+      <div data-btn class="btn btn-close hide-circle-btn">
+        <img src="./assets/close.svg" />
+      </div>
+      <div data-btn class="btn btn-beauty hide-circle-btn">
+        <img src="./assets/beauty.svg" />
+      </div>
+      <div data-btn class="btn btn-mirror hide-circle-btn">
+        <img src="./assets/mirror.svg" />
+      </div>
+      <div data-btn class="btn btn-face hide-circle-btn">
+        <img src="./assets/face.svg" />
+      </div>
+
+      <div data-btn class="btn-change-size hide-circle-btn">
+        <div class="btn-change-size-btn btn-change-size-small"></div>
+        <div class="btn-change-size-btn btn-change-size-middle"></div>
+        <div class="btn-change-size-btn btn-change-size-large"></div>
+      </div>
+    </div>
+
+    <script src="./stats.js"></script>
+    <script src="./cv-utils.js"></script>
+    <script src="./index.js"></script>
+    <script src="./opencv.js"></script>
+  </body>
+</html>
+
+<script></script>
