@@ -3,6 +3,10 @@ function Utils() {
   let self = this;
 
   const OPENCV_URL = "opencv.js";
+  const FACE_PADDING_THRESHOLD = 0.1;
+  const FACE_SHAKE_FILTER_SIZE = 40;
+  const FACE_SHAKE_FILTER_LIST = [];
+
   this.loadOpenCv = function (onloadCallback) {
     let script = document.createElement("script");
     script.setAttribute("async", "");
@@ -128,7 +132,7 @@ function Utils() {
     }
   }
 
-  this.startCamera = function (resolution, callback, videoId) {
+  this.startCamera = function (resolution, callback, videoId, errorCallback) {
     const constraints = {
       qvga: { width: { exact: 320 }, height: { exact: 240 } },
       vga: { width: { exact: 640 }, height: { exact: 480 } },
@@ -155,6 +159,9 @@ function Utils() {
       })
       .catch(function (err) {
         self.printError("Camera Error: " + err.name + " " + err.message);
+        if (errorCallback) {
+          errorCallback(err);
+        }
       });
   };
 
@@ -167,5 +174,65 @@ function Utils() {
     if (this.stream) {
       this.stream.getVideoTracks()[0].stop();
     }
+  };
+
+  this.face_padding = function (p1, p2, w, h) {
+    const padding = Math.min(w, h) * FACE_PADDING_THRESHOLD;
+    const _p1 = {
+      x: Math.max(p1.x - padding, 0),
+      y: Math.max(p1.y - padding, 0),
+    };
+    const _p2 = {
+      x: Math.min(p2.x + 2 * padding, w - p1.x),
+      y: Math.min(p2.y + 2 * padding, h - p1.y),
+    };
+    const _center = {
+      x: _p1.x + _p2.x / 2,
+      y: _p1.y + _p2.y / 2,
+    };
+    const _r = Math.min(_p2.x, _p2.y) / 2;
+
+    // 正方形
+    return [
+      { x: _center.x - _r, y: _center.y - _r },
+      { x: 2 * _r, y: 2 * _r },
+    ];
+  };
+
+  this.shakeFilter = function (p1, p2) {
+    if (FACE_SHAKE_FILTER_LIST.length >= FACE_SHAKE_FILTER_SIZE) {
+      FACE_SHAKE_FILTER_LIST.shift();
+      FACE_SHAKE_FILTER_LIST.push({ p1, p2 });
+    } else {
+      FACE_SHAKE_FILTER_LIST.push({ p1, p2 });
+    }
+
+    const sum_point = FACE_SHAKE_FILTER_LIST.reduce(
+      (prev, curr) => {
+        return {
+          p1: { x: prev.p1.x + curr.p1.x, y: prev.p1.y + curr.p1.y },
+          p2: { x: prev.p2.x + curr.p2.x, y: prev.p2.y + curr.p2.y },
+        };
+      },
+      { p1: { x: 0, y: 0 }, p2: { x: 0, y: 0 } }
+    );
+
+    return [
+      sum_point.p1.x / FACE_SHAKE_FILTER_LIST.length,
+      sum_point.p1.y / FACE_SHAKE_FILTER_LIST.length,
+      sum_point.p2.x / FACE_SHAKE_FILTER_LIST.length,
+      sum_point.p2.y / FACE_SHAKE_FILTER_LIST.length,
+    ];
+  };
+
+  this.beauty = function (dst) {
+    let _dst = new cv.Mat();
+    let _dst2 = new cv.Mat();
+
+    cv.cvtColor(dst, _dst, cv.COLOR_RGBA2RGB);
+    cv.bilateralFilter(_dst, _dst2, 4, 100, 10, 4);
+    _dst.delete();
+
+    return _dst2;
   };
 }
