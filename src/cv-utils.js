@@ -180,8 +180,8 @@ function Utils() {
     }
   };
 
-  this.face_padding = function (p1, p2, w, h) {
-    const padding = Math.min(w, h) * FACE_PADDING_THRESHOLD;
+  this.face_padding = function (p1, p2, w, h, ratio) {
+    const padding = Math.min(w, h) * (ratio ?? FACE_PADDING_THRESHOLD);
     const _p1 = {
       x: Math.max(p1.x - padding, 0),
       y: Math.max(p1.y - padding, 0),
@@ -203,8 +203,8 @@ function Utils() {
     ];
   };
 
-  this.shakeFilter = function (p1, p2) {
-    if (FACE_SHAKE_FILTER_LIST.length >= FACE_SHAKE_FILTER_SIZE) {
+  this.shakeFilter = function (p1, p2, size) {
+    if (FACE_SHAKE_FILTER_LIST.length >= (size || FACE_SHAKE_FILTER_SIZE)) {
       FACE_SHAKE_FILTER_LIST.shift();
       FACE_SHAKE_FILTER_LIST.push({ p1, p2 });
     } else {

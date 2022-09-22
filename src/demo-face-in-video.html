@@ -1,0 +1,176 @@
+<!-- 
+ * @author  lecepin
+ * @github  https://github.com/lecepin 
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>音视频捕获</title>
+  </head>
+
+  <body>
+    <div style="display: flex">
+      <video
+        id="cam-video"
+        src="./assets/demo-face.mp4"
+        style="width: 48%; height: 48%"
+        controls
+      ></video>
+      <canvas
+        style="position: absolute; width: 48%; right: 0; top: 0"
+        id="canvasOutput2"
+      ></canvas>
+    </div>
+    <canvas style="width: 48%; height: 48%" id="canvasOutput"></canvas>
+    <div>
+      <button id="btn-padding">填充</button>
+      <button id="btn-filter">防抖</button>
+      <button id="btn-border">框选</button>
+    </div>
+
+    <script src="./stats.js"></script>
+    <script src="./cv-utils.js"></script>
+    <script>
+      const utils = new Utils();
+      const videoInput = document.getElementById("cam-video");
+      const config = {
+        padding: false,
+        filter: false,
+        border: true,
+      };
+
+      document.getElementById("btn-padding").addEventListener("click", () => {
+        config.padding = !config.padding;
+      });
+      document.getElementById("btn-filter").addEventListener("click", () => {
+        config.filter = !config.filter;
+      });
+      document.getElementById("btn-border").addEventListener("click", () => {
+        config.border = !config.border;
+      });
+
+      window.onload = () => {
+        utils.loadOpenCv(() => {
+          utils.createFileFromUrl(
+            "haarcascade_frontalface_default.xml",
+            "./assets/haarcascade_frontalface_default.xml",
+            () => {
+              videoInput.addEventListener("play", onVideoCanPlay, false);
+
+              function onVideoCanPlay() {
+                videoInput.width = videoInput.videoWidth;
+                videoInput.height = videoInput.videoHeight;
+
+                let [roiPoint1, roiPoint2] = [
+                  { x: 0, y: 0 },
+                  {
+                    x: videoInput.width,
+                    y: videoInput.height,
+                  },
+                ];
+
+                let src = new cv.Mat(
+                  videoInput.height,
+                  videoInput.width,
+                  cv.CV_8UC4
+                );
+                let dst = new cv.Mat(
+                  videoInput.height,
+                  videoInput.width,
+                  cv.CV_8UC4
+                );
+                let gray = new cv.Mat();
+                let cap = new cv.VideoCapture(videoInput);
+                let faces = new cv.RectVector();
+                let classifier = new cv.CascadeClassifier();
+
+                classifier.load("haarcascade_frontalface_default.xml");
+
+                const FPS = 30;
+                function processVideo() {
+                  try {
+                    let begin = Date.now();
+
+                    cap.read(src);
+                    src.copyTo(dst);
+
+                    let renderMat = dst;
+                    let renderMat2 = src;
+
+                    cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
+                    cv.pyrDown(gray, gray);
+                    cv.pyrDown(gray, gray);
+                    classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
+
+                    for (let i = 0; i < faces.size(); ++i) {
+                      let xRatio = videoInput.width / gray.size().width;
+                      let yRatio = videoInput.height / gray.size().height;
+
+                      let face = faces.get(i);
+                      let point1 = new cv.Point(
+                        face.x * xRatio,
+                        face.y * yRatio
+                      );
+                      let point2 = new cv.Point(
+                        (face.x + face.width) * xRatio,
+                        (face.y + face.height) * yRatio
+                      );
+                      [roiPoint1, roiPoint2] = utils.face_padding(
+                        {
+                          x: face.x * xRatio,
+                          y: face.y * yRatio,
+                        },
+                        {
+                          x: face.width * xRatio,
+                          y: face.height * yRatio,
+                        },
+                        videoInput.width,
+                        videoInput.height,
+                        config.padding ? 0.1 : 0
+                      );
+
+                      cv.rectangle(
+                        renderMat,
+                        point1,
+                        point2,
+                        [0, 255, 0, 255],
+                        3
+                      );
+
+                      break;
+                    }
+
+                    cv.imshow("canvasOutput", renderMat);
+                    cv.imshow(
+                      "canvasOutput2",
+                      (config.border ? dst : src).roi(
+                        new cv.Rect(
+                          ...utils.shakeFilter(
+                            { x: roiPoint1.x, y: roiPoint1.y },
+                            { x: roiPoint2.x, y: roiPoint2.y },
+                            config.filter ? 20 : 1
+                          )
+                        )
+                      )
+                    );
+
+                    let delay = 1000 / FPS - (Date.now() - begin);
+                    setTimeout(processVideo, delay);
+                  } catch (err) {
+                    utils.printError(err);
+                  }
+                }
+
+                setTimeout(processVideo, 0);
+              }
+            }
+          );
+        });
+      };
+    </script>
+  </body>
+</html>
+
+<script></script>
