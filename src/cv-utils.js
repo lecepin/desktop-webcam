@@ -1,3 +1,7 @@
+/**
+ * @author  lecepin
+ * @github  https://github.com/lecepin
+ */
 function Utils() {
   // eslint-disable-line no-unused-vars
   let self = this;

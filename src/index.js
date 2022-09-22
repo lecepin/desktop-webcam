@@ -1,3 +1,7 @@
+/**
+ * @author  lecepin
+ * @github  https://github.com/lecepin
+ */
 const { dialog } = window.__TAURI__;
 const { LogicalPosition, LogicalSize, getCurrent, appWindow } =
   window.__TAURI__.window;
