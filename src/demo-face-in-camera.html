@@ -28,6 +28,32 @@
     <script src="./stats.js"></script>
     <script src="./cv-utils.js"></script>
     <script>
+      {
+        const RUNTIME_CONF = {
+          fps: true,
+          fps_dom: null,
+        };
+        const stats = new Stats();
+        const loop = function loop() {
+          if (RUNTIME_CONF.fps) {
+            if (!RUNTIME_CONF.fps_dom) {
+              document.body.appendChild(stats.dom);
+              RUNTIME_CONF.fps_dom = stats.dom;
+            }
+            RUNTIME_CONF.fps_dom.style.display = "block";
+          } else if (!RUNTIME_CONF.fps) {
+            if (RUNTIME_CONF.fps_dom) {
+              RUNTIME_CONF.fps_dom.style.display = "none";
+            }
+          }
+
+          RUNTIME_CONF.fps && stats.update();
+          requestAnimationFrame(loop);
+        };
+
+        loop();
+      }
+
       const utils = new Utils();
       const videoInput = document.getElementById("cam-video");
       const config = {
